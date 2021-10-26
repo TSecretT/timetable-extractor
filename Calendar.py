@@ -18,6 +18,7 @@ class TimetableGenerator():
         self.calendarID = None
         self.weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         self.semesterStartDate = sys.argv[2]
+        self.semesterNum = int(sys.argv[3])
 
     def login(self):
         creds = None
@@ -77,7 +78,6 @@ class TimetableGenerator():
         return self.service.calendars().insert(body=calendar).execute()
 
     def createEvent(self, name:str, location:str, timeStart:str, timeEnd:str, recurranceType:str, description:str=None):
-        # 2021-10-26T09:00:00
         event = {
             'summary': name,
             'location': location,
@@ -101,8 +101,7 @@ class TimetableGenerator():
             }
         }
 
-        event = self.service.events().insert(calendarId=self.calendarID, body=event).execute()
-        print(event)
+        return self.service.events().insert(calendarId=self.calendarID, body=event).execute()
 
     def generate(self):
 
@@ -116,7 +115,7 @@ class TimetableGenerator():
                     if course == self.course:
                         self.calendarID = id
         except:
-            calendar = self.createCalendar(name=self.course)
+            calendar = self.createCalendar(name=f"{self.course.upper()} Semester {self.semesterNum}")
             self.calendarID = calendar['id']
             with open('calendars.txt', 'w') as f:
                 f.write(f"{self.course},{calendar['id']}")
@@ -135,6 +134,8 @@ class TimetableGenerator():
                 date = slot[7]
                 room = slot[8]
                 info = slot[9]
+
+                if semester != self.semesterNum: continue
 
                 if isinstance(date, float): continue
                 date = date.split('\r')
@@ -190,7 +191,3 @@ class TimetableGenerator():
                     self.createEvent(name=courseName, location=room, timeStart=timeStartDate.isoformat(), timeEnd=timeEndDate.isoformat(), description=f"{courseType} {courseFormat}\n{info}\nSemester: {semester}\nLecturer: {lecturer}\nModule ID: {moduleID}", recurranceType=recurrenceType.upper())
                 except Exception as e:
                     print(e)
-
-generator = TimetableGenerator()
-
-generator.generate()

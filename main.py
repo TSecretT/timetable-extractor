@@ -1,9 +1,9 @@
-from calendar import TimetableGenerator
+from Calendar import TimetableGenerator
 
-generator = TimetableGenerator()
 
 def main():
-    pass
+    generator = TimetableGenerator()
+    generator.generate()
 
 if __name__ == "__main__":
     main()
